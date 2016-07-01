@@ -1,7 +1,7 @@
 Miss Match
 ============================
 
-Miss Match is a HTML Parser designed to identify miss matched HTML tags.
+Miss Match is a HTML Parser designed to identify mismatched HTML tags.
 
 It will report tags that haven't been opened correctly, e.g.:
 
