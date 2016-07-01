@@ -20,6 +20,6 @@ Installation via pip is not available (yet). For now just clone this repository,
 Usage 
 ------------
 
-python main.py http://www.example.com
+`python main.py http://www.example.com`
 
 
