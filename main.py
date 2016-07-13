@@ -53,6 +53,11 @@ class HTMLMismatchParser(HTMLParser):
         'title', 'base', 'link', 'style', 'meta', 'script', 'noscript'
     ]
 
+    def __init__(self):
+        super(HTMLMismatchParser, self).__init__()
+        self.tags = []
+        self.errors = []
+
     def handle_starttag(self, start, attrs):
 
         if start not in self.void_elements:
@@ -60,7 +65,7 @@ class HTMLMismatchParser(HTMLParser):
             self.tags.append(tag)
 
             if self.in_head and start not in self.head_elements:
-                print("ERROR")
+                print("\nERROR")
                 msg = "{t} is not valid in {ht}".format(t=tag, ht='<head>')
                 print(msg)
                 self.errors.append(msg)
@@ -81,24 +86,18 @@ class HTMLMismatchParser(HTMLParser):
                 tm = TagMismatch(start, end_tag)
                 self.errors.append(tm)
 
-                print("")
-                print("ERROR requiring input")
-                print("######################")
-                print("")
+                print("\nERROR")
                 print(tm)
-                print("")
                 print("CASE 1)")
                 print(tm.end)
                 print("... is a rogue end tag - i.e. it was never opened")
                 print("Continue as if we never saw it")
-                print("")
                 print("CASE 2)")
                 print(tm.start)
                 print("... is missing an end tag")
                 print("Continue as if we found the close tag")
 
-                print('')
-                case = input("Enter 1 or 2: ")
+                case = input("\nEnter 1 or 2: ")
 
                 if case.lower() == '1':
                     # Rogue end tag
@@ -113,20 +112,39 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
         description="Show tag mismatches on given URL")
-    parser.add_argument('url', nargs=1)
+    parser.add_argument('--url', nargs='?', default=None)
+    parser.add_argument('--infile', nargs='?', default=None)
     args = parser.parse_args()
 
-    url = args.url.pop()
+    urls = []
+    errors = {}
 
-    r = requests.get(url)
-    r.raise_for_status()
+    if args.url:
+        urls += [args.url]
 
-    mismatch_parser = HTMLMismatchParser()
-    mismatch_parser.feed(r.text)
+    if args.infile:
+        with open(args.infile) as f:
+            url_list = f.read()
+            urls += url_list.splitlines()
 
-    if mismatch_parser.errors:
-        print("")
-        print("There were errors: ")
-        print("###################")
-        for error in mismatch_parser.errors:
-            print(error)
+    for url in urls:
+
+        r = requests.get(url)
+        r.raise_for_status()
+
+        print("\nChecking {u}:\n".format(u=url))
+
+        mismatch_parser = HTMLMismatchParser()
+        mismatch_parser.feed(r.text)
+
+        if mismatch_parser.errors:
+            errors[url] = mismatch_parser.errors
+
+    if errors:
+        print("ERRORS:\n")
+        for url, error_list in errors.items():
+            print(url)
+            for error in error_list:
+                print("\t{e}".format(e=error))
+    else:
+        print("SUCCESS\n")
