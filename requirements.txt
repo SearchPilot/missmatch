@@ -1,3 +1,3 @@
 beautifulsoup4==4.4.1
-requests==2.10.0
+requests==2.20.0
 git+git://github.com/DistilledLtd/lxml.git@2ffdab00fad47a79b33dfb1c357c9b5c45cea1d7#egg=lxml
